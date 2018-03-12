@@ -9,8 +9,8 @@ Inside the folder `aex-nxp`, the `Makefile` contains various control flags:
 - `AES128` enable 128-bit key
 - `AES192` enable 192-bit key
 - `AES256` enable 256-bit key
-- `ENABLE_UART_LOG`
-- `ENABLE_UART_RX`
+- `ENABLE_UART_LOG` enable printf-like UART transmission
+- `ENABLE_UART_RX` enable UART reception
 
 In the same folder, `main.c` contains the main routine, summarised in:
 - GPIO is set high
@@ -33,5 +33,5 @@ To use, follow these steps:
 
 [tiny-AES-c]: https://github.com/kokke/tiny-AES-c
 [arm-gcc]: https://developer.arm.com/open-source/gnu-toolchain/gnu-rm
-[datasheer]: https://www.nxp.com/docs/en/data-sheet/LPC111X.pdf
+[datasheet]: https://www.nxp.com/docs/en/data-sheet/LPC111X.pdf
 [user-manual]: https://www.nxp.com/docs/en/user-guide/UM10398.pdf
