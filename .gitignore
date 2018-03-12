@@ -1,6 +1,8 @@
-mspconf.mk
-conf.mk
-aes-msp430/
-aes-arm/
-Nucleo_blink_led/
+*~
+nxp/mspconf.mk
+nxp/conf.mk
+nxp/aes-msp430/
+nxp/aes-arm/
+nxp/Nucleo_blink_led/
 .DS_Store
+**/.DS_store
