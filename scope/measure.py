@@ -33,7 +33,7 @@ def main():
     scope.write(b"WAV:STOP 40")
 
     # Get data
-    raw_data = scope.read(b"WAV:DATA?")
+    raw_data = scope.read(b"WAV:DATA?")  # FIXME: Why is data allways the same?
 
     data = np.frombuffer(raw_data, "B")
     plt.plot(data)
