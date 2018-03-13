@@ -8,6 +8,10 @@
 #endif
 
 
+extern uint8_t input_text[];
+extern uint8_t idx;
+
+
 /**
  * Initialize UART.
  */
@@ -37,9 +41,11 @@ void uart_init()
     Chip_UART_IntEnable(LPC_USART, UART_IER_RBRINT);
     // Chip_UART_IntEnable(LPC_USART, (UART_IER_RBRINT | UART_IER_RLSINT));
 
-    // Enable UART general interrupt, with priority 1.
+    // Set UART general interrupt's priority (1).
     NVIC_SetPriority(UART0_IRQn, 1);
-    NVIC_EnableIRQ(UART0_IRQn);
+
+    // UART RX interrupt is enabled in main routine.
+    // NVIC_EnableIRQ(UART0_IRQn);
 #endif
 }
 
@@ -51,5 +57,7 @@ void UART_IRQHandler(void)
 {
 	uint8_t received = Chip_UART_ReadByte(LPC_USART);
 
-	// TODO: handle here UART received data if needed
+    // Fill in text array.
+    input_text[idx] = received;
+    idx++;
 }
