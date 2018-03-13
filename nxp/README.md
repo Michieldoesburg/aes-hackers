@@ -1,8 +1,10 @@
 # AES Hackers for Hacking Lab
 
-This code implements an AES encryption/decryption algorithm for a Cortex-M0-based NXP LPC1114FN barebone microcontroller, based on [this library][tiny-AES-c].
+This code implements an AES encryption/decryption algorithm for a Cortex-M0-based NXP [LPC1114FN][lpc1114fn] barebone microcontroller, based on [this library][tiny-AES-c].
 
-Inside the folder `aex-nxp`, the `Makefile` contains various control flags:
+**Control parameters**:
+
+Inside the folder `nxp/aex-nxp`, the `Makefile` contains various control flags:
 - `ECB` enables/disable this AES mode
 - `CBC` enables/disable this AES mode
 - `CTR` enables/disable this AES mode
@@ -12,26 +14,25 @@ Inside the folder `aex-nxp`, the `Makefile` contains various control flags:
 - `ENABLE_UART_LOG` enable printf-like UART transmission
 - `ENABLE_UART_RX` enable UART reception
 
-In the same folder, `main.c` contains the main routine, summarised in:
-- GPIO is set high
-- some input plain text is encrypted
-- some encrypted text is decrypted
-- GPIO is set low
-- repeat...
-
-To use, follow these steps:
+**To compile**:
 - clone the repository
 - download the ARM GCC compiler from [here][arm-gcc]
-- in file `nxpconf.mk`, replace `ARM_DIR` with the path where the installation folder of the compiler is placed
-- from `aes-nxp`, run make
-- the executables `aes.elf` and `aes.bin` are in `aes-nxp/bld`
+- in file `nxp/nxpconf.mk`, replace `ARM_DIR` with the path where the installation folder of the compiler is placed
+- from `nxp/aes-nxp`, run `make`
+- the executables `aes.elf` and `aes.bin` are in `nxp/aes-nxp/bld`
+
+**To run**:
+- flash the compiled binary and run it (see [here][connect-to-mcu])
+- launch `nxp/aes-term/aes.py` to interface to the MCU, send plain text and receive encrypted text
 
 ## References
 - [Datasheet][datasheet]
 - [User manual][user-manual]
 
 
+[lpc1114fn]: https://www.nxp.com/products/processors-and-microcontrollers/arm-based-processors-and-mcus/lpc-cortex-m-mcus/lpc1100-cortex-m0-plus-m0/scalable-entry-level-32-bit-microcontroller-mcu-based-on-arm-cortex-m0-plus-m0-cores:LPC1114FN28
 [tiny-AES-c]: https://github.com/kokke/tiny-AES-c
 [arm-gcc]: https://developer.arm.com/open-source/gnu-toolchain/gnu-rm
+[connect-to-mcu]: https://community.nxp.com/thread/421369
 [datasheet]: https://www.nxp.com/docs/en/data-sheet/LPC111X.pdf
 [user-manual]: https://www.nxp.com/docs/en/user-guide/UM10398.pdf
