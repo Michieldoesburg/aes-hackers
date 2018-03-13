@@ -16,14 +16,16 @@
  * TODO: implement UART reception if needed
  */
 
+#include <stdio.h>
+
 #include <chip.h>
 #if USE_BOARD
 #include <board.h>
 #endif
 
-#include <stdio.h>
 #include <aes.h>
 #include <uart.h>
+#include <tiny_printf.h>
 
 #define DEBUG_PORT 0
 #define DEBUG_PIN  3

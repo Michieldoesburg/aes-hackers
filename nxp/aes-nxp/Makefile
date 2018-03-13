@@ -36,8 +36,7 @@ CFLAGS += \
 	-O1 \
 	-MD \
 	-ffunction-sections \
-	-fdata-sections \
-	-fno-builtin
+	-fdata-sections
 
 # Linker flags
 

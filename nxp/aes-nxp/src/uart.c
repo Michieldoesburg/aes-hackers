@@ -53,13 +53,3 @@ void UART_IRQHandler(void)
 
 	// TODO: handle here UART received data if needed
 }
-
-
-/**
- * Retarget C library function to reroute printf.
- */
-int _write (int fd, char *ptr, int len)
-{
-	int sent = Chip_UART_SendBlocking(LPC_USART, ptr, len);
-	return len - sent;
-}

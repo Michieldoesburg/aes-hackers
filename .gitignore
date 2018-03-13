@@ -6,3 +6,4 @@ nxp/aes-arm/
 nxp/Nucleo_blink_led/
 .DS_Store
 **/.DS_store
+bld/

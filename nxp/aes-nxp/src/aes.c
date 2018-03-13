@@ -108,10 +108,10 @@ static void KeyExpansion(uint8_t* RoundKey, const uint8_t* Key)
     for (i = Nk; i < Nb * (Nr + 1); ++i) {
         
         k = (i - 1) * 4;
-        tempa[0]=RoundKey[k + 0];
-        tempa[1]=RoundKey[k + 1];
-        tempa[2]=RoundKey[k + 2];
-        tempa[3]=RoundKey[k + 3];
+        tempa[0] = RoundKey[k + 0];
+        tempa[1] = RoundKey[k + 1];
+        tempa[2] = RoundKey[k + 2];
+        tempa[3] = RoundKey[k + 3];
 
         if (i % Nk == 0) {
             // This function shifts the 4 bytes in a word to the left once.
