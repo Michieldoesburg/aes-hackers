@@ -19,6 +19,7 @@ LD         := $(GCC_DIR)/arm-none-eabi-gcc
 AR         := $(GCC_DIR)/arm-none-eabi-ar
 SIZE       := $(GCC_DIR)/arm-none-eabi-size
 OBJCOPY    := $(GCC_DIR)/arm-none-eabi-objcopy
+GDB        := $(GCC_DIR)/arm-none-eabi-gdb
 MAKE       := make
 
 # Startup and linker script

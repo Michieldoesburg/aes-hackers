@@ -54,14 +54,14 @@ uint8_t key[] = {
 
 // Input string = "ABCDEFGH12345678".
 // AES's ECB method can only be fed a 16 byte buffer.
-// uint8_t input_text[16] = {
-// 	'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
-// 	'1', '2', '3', '4', '5', '6', '7', '8'
-// };
+uint8_t input_text[AES_BLOCKLEN] = {
+	'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+	'1', '2', '3', '4', '5', '6', '7', '8'
+};
 
 // Get input from UART.
 uint8_t idx;
-uint8_t input_text[AES_BLOCKLEN];
+// uint8_t input_text[AES_BLOCKLEN];
 
 
 int main(void)
@@ -99,9 +99,10 @@ int main(void)
 	while (1) {
 		// Receive text to be encrypted via UART (interrupt).
 		idx = 0;
-		NVIC_EnableIRQ(UART0_IRQn);
-		while (idx < AES_BLOCKLEN);
-		NVIC_DisableIRQ(UART0_IRQn);
+
+		// NVIC_EnableIRQ(UART0_IRQn);
+		// while (idx < AES_BLOCKLEN);
+		// NVIC_DisableIRQ(UART0_IRQn);
 
 		// Not logging since UART is used to send encrypted data to terminal!
 		// LOG("Received text: ");
@@ -122,8 +123,11 @@ int main(void)
 		// Pull-down GPIO.
 		Chip_GPIO_SetPinOutLow(LPC_GPIO, DEBUG_PORT, DEBUG_PIN);
 
+		// Decrypt data.
+		AES_ECB_decrypt(&ctx, input_text);
+
 		// Send back encrypted data via UART.
-		Chip_UART_SendBlocking(LPC_USART, input_text, AES_BLOCKLEN);
+		// Chip_UART_SendBlocking(LPC_USART, input_text, AES_BLOCKLEN);
 	}
 
 	return 1;

@@ -13,7 +13,7 @@ hex_key = '\x2b\x7e\x15\x16\x28\xae\xd2\xa6\xab\xf7\x15\x88\x09\xcf\x4f\x3c'
 cipher = AES.new(hex_key, AES.MODE_ECB)
 
 # Specify device name and BaudRate
-port = '/dev/devname'
+port = '/dev/tty.usbserial-A6Y3SYXN'
 baudrate = 115200
 
 # Open serial connection

@@ -87,7 +87,7 @@ static void tiny_puth(unsigned n)
 }
 
 
-static int tiny_(const char *str){
+static int tiny_puts(const char *str){
 	while (*str != 0){
 		PUTC(*str++);
 	}

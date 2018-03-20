@@ -6,8 +6,8 @@ PROJECT = aes
 
 # Source and build files
 
-SRC_DIR = ./src
-BLD_DIR = ./bld
+SRC_DIR = src
+BLD_DIR = bld
 SOURCES := $(wildcard $(SRC_DIR)/*.c)
 OBJECTS := $(patsubst $(SRC_DIR)/%,$(BLD_DIR)/%,$(SOURCES:.c=.o))
 DEPS    := $(OBJECTS:.o=.d)
@@ -22,8 +22,8 @@ DEFINES += \
 	-DUSE_BOARD=0 \
 	-DECB=1 \
 	-DAES128=1 \
-	-DENABLE_UART_LOG=1 \
-	-DENABLE_UART_RX=1 \
+	-DENABLE_UART_LOG=0 \
+	-DENABLE_UART_RX=0 \
 
 INCLUDES += \
 	-I ./include \
@@ -52,6 +52,14 @@ LIBS += \
 	-lgcc \
 	-lc
 
+# Run options
+
+RUN_TOOLS_DIR  := /Applications/MCUXpressoIDE_10.1.1_606/ide/bin
+LPC_LINK_BOOT  := $(RUN_TOOLS_DIR)/boot_link2
+LPC_LINK_FLASH := $(RUN_TOOLS_DIR)/crt_emu_cm_redlink
+
+FLASH_DEVICE   := LPC1114FN/102
+
 # Other options
 
 VERBOSE ?= 1
@@ -65,7 +73,7 @@ endif
 
 # Rules
 
-.PHONY: all dirs libs $(LPCOPEN) clean rebuild run
+.PHONY: all dirs libs $(LPCOPEN) clean rebuild run debug
 
 all: dirs libs $(ELF)
 
@@ -95,5 +103,17 @@ clean:
 rebuild: clean all
 
 run: all
-	@cp $(BIN) /Volumes/NODE_F446RE
-	$(VECHO) "$(PROJECT).bin uploaded to target"
+	$(VECHO) ""
+	$(VECHO) "Booting LPC-Link2..."
+	$(V) $(LPC_LINK_BOOT)
+	$(VECHO) ""
+	$(VECHO) "Uploading firmware..."
+	$(V) $(LPC_LINK_FLASH) -flash-load-exec "$(ELF)" -p$(FLASH_DEVICE)
+
+debug: all
+	$(VECHO) ""
+	$(VECHO) "Booting LPC-Link2..."
+	$(V) $(LPC_LINK_BOOT)
+	$(VECHO) ""
+	$(VECHO) "Starting GDB..."
+	$(GDB) -ex "target extended-remote | $(LPC_LINK_FLASH) -2 -p$(FLASH_DEVICE)" $(ELF)
