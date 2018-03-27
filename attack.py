@@ -5,6 +5,9 @@ import numpy as np
 N_bytes_string = 16
 N_bytes_key = 128
 M_traces = 1000
+Trace_length = 1200
+Key_range = 256
+
 s_box = np.asarray([
 0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76,
     0xca, 0x82, 0xc9, 0x7d, 0xfa, 0x59, 0x47, 0xf0, 0xad, 0xd4, 0xa2, 0xaf, 0x9c, 0xa4, 0x72, 0xc0,
@@ -26,6 +29,7 @@ s_box = np.asarray([
 
 
 def hamming_weight(n):
+    n = int(n)
     c = 0
     while n:
         c += 1
@@ -42,19 +46,30 @@ for i in range(M_traces):
     plain_texts.append(np.random.bytes(N_bytes_string))
 
 # Record power consumption
+traces = np.ndarray(shape=(M_traces, Trace_length))
 for i in range(M_traces):
-    # Send in plaintext
-    # Record trace
+    # Send in plaintext over serial
+    # Record trace from scope
     # Place in trace matrix
     break
 
 # Calculate hypothetical values
-hyp_values = np.ndarray(shape=(M_traces, 255))
-
+hyp_values = np.ndarray(shape=(M_traces, Key_range))
 for i in range(M_traces):
-    for j in range(255):  # Try all one byte keys
-        print(i,j)
+    for j in range(Key_range):  # Try all one byte keys
         hyp_values[i, j] = s_box[int(plain_texts[i][0].encode("hex"), 16) ^ j]
 
 # Calculate hypothetical power with hamming weight
-hyp_power = 
+hyp_power = np.ndarray(shape=(M_traces, Key_range))
+for i in range(M_traces):
+    for j in range(Key_range):
+        hyp_power[i, j] = hamming_weight(hyp_values[i, j])
+
+# Calculate correlation between hypothetical
+# and actual power consumption
+correlation = np.ndarray(shape=(Key_range, Trace_length))
+for i in range(Key_range):
+    for j in (Trace_length):
+        correlation[i, j] = np.corrcoeff(hyp_power[:, i], traces[:, j])
+
+# Find peaks in correlation
