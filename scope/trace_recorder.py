@@ -1,5 +1,6 @@
 import csv
 import os
+from ConfigParser import SafeConfigParser
 
 
 class trace_recorder(object):
@@ -26,6 +27,13 @@ class trace_recorder(object):
             file.write(self.trace_count)
 
     def setup(self):
+        config = SafeConfigParser()
+        config.read('config.ini')
+        self.directory = config.get('main', 'directory')
+
+        with open('config.ini', 'w') as f:
+            config.write(f)
+
         # Create directory for the traces
         self.create_directory()
 
