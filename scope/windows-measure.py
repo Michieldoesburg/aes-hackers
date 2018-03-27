@@ -5,7 +5,8 @@ analyze it for a NEC protocol signal.
 Ken Shirriff
 http://righto.com
 """
-import array
+import numpy as np
+import matplotlib.pyplot as plt
 import sys
 import time
 import visa
@@ -24,22 +25,24 @@ def scopewrite(str):
     time.sleep(.1)
 
 # Set the scope the way we want it
-scopewrite('*IDN?') # Long memory type
-print scope.read()
+#scopewrite('*IDN?') # Long memory type
+#print scope.read()
 
 # Reset scope
-scope.write(b"*RST")
+#scope.write(b"*RST")
 
 time.sleep(4)
 
 # Enable recording
-scopewrite(":FUNC:WREC:ENAB 1")
+#scopewrite(":FUNC:WREC:ENAB 1")
 
-# Start recording
+scopewrite(":STOP")
+
+"""""# Start recording
 scopewrite(":FUNC:WREC:OPER RUN")
 time.sleep(3)
 # Stop recording
-scopewrite(":FUNC:WREC:OPER STOP")
+scopewrite(":FUNC:WREC:OPER STOP")"""
 
 # Choose channel
 scopewrite(":WAV:SOUR CHAN1")
@@ -50,11 +53,15 @@ scopewrite("WAV:FORM BYTE")
 
 # Choose start- and stopping point
 scopewrite("WAV:STAR 1")
-scopewrite("WAV:STOP 41")
+scopewrite("WAV:STOP 1200")
 
 scopewrite("WAV:DATA?")
-data = scope.read(encoding="Latin-1")
+result = scope.read(encoding="Latin-1")
 # Get data
-print ':'.join(hex(ord(x))[2:] for x in data)
+print ':'.join(hex(ord(x))[2:] for x in result)
 
+data = np.frombuffer(result[12:-1], 'B')
+data_compounded = [(data[i] << 8) + data[i+1] for i in range(0, len(data), 2)]
+plt.plot(data_compounded)
+plt.show()
 
