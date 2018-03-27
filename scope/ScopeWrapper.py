@@ -18,7 +18,6 @@ class ScopeWrapper(object):
             sys.exit(-1)
         self.scope = visa.instrument(usb[0], timeout=20, chunk_size=1024000) # bigger timeout for long mem
 
-    # Oscilloscope can get confused if too many commands arrive too fast
     def write(self, str):
         self.scope.write(str)
         time.sleep(.1)
