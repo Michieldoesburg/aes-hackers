@@ -10,9 +10,6 @@ import sys
 import time
 import visa
 
-reload(sys)
-sys.setdefaultencoding('Cp1252')
-
 # Get the USB device, e.g. 'USB0::0x1AB1::0x0588::DS1ED141904883'
 instruments = visa.get_instruments_list()
 usb = filter(lambda x: 'USB' in x, instruments)
@@ -53,10 +50,11 @@ scopewrite("WAV:FORM BYTE")
 
 # Choose start- and stopping point
 scopewrite("WAV:STAR 1")
-scopewrite("WAV:STOP 40")
+scopewrite("WAV:STOP 41")
 
 scopewrite("WAV:DATA?")
-
+data = scope.read(encoding="Latin-1")
 # Get data
-print scope.read(encoding='Latin-1')
+print ':'.join(hex(ord(x))[2:] for x in data)
+
 
