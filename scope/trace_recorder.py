@@ -27,12 +27,10 @@ class trace_recorder(object):
             file.write(self.trace_count)
 
     def setup(self):
+        # Read the settings file
         config = SafeConfigParser()
         config.read('config.ini')
         self.directory = config.get('main', 'directory')
-
-        with open('config.ini', 'w') as f:
-            config.write(f)
 
         # Create directory for the traces
         self.create_directory()
@@ -40,7 +38,7 @@ class trace_recorder(object):
         # Check if the file that records the tracecount exists, if it doesn't then create it.
         if not os.path.exists(self.trace_count_file_path):
             file = open(self.trace_count_file_path, 'w')
-            file.write("1")
+            file.write(self.trace_count)
             file.close()
         else:
             file = open(self.trace_count_file_path, 'r')
