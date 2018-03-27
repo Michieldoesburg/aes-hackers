@@ -8,8 +8,8 @@
 #endif
 
 
-extern uint8_t input_text[];
-extern uint8_t idx;
+extern uint8_t buffer[];
+extern uint8_t uart_rx_done;
 
 
 /**
@@ -55,9 +55,15 @@ void uart_init()
  */
 void UART_IRQHandler(void)
 {
-	uint8_t received = Chip_UART_ReadByte(LPC_USART);
+    static uint8_t index = 0;
+
+    uint8_t received = Chip_UART_ReadByte(LPC_USART);
 
     // Fill in text array.
-    input_text[idx] = received;
-    idx++;
+    buffer[index] = received;
+    index++;
+
+    if (index == 16) {
+        uart_rx_done = 1;
+    }
 }
