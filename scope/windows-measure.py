@@ -5,6 +5,7 @@ analyze it for a NEC protocol signal.
 Ken Shirriff
 http://righto.com
 """
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
@@ -23,10 +24,6 @@ scope = visa.instrument(usb[0], timeout=20, chunk_size=1024000) # bigger timeout
 def scopewrite(str):
     scope.write(str)
     time.sleep(.1)
-
-# Set the scope the way we want it
-#scopewrite('*IDN?') # Long memory type
-#print scope.read()
 
 # Reset scope
 #scope.write(b"*RST")
@@ -64,4 +61,8 @@ data = np.frombuffer(result[12:-1], 'B')
 data_compounded = [(data[i] << 8) + data[i+1] for i in range(0, len(data), 2)]
 plt.plot(data_compounded)
 plt.show()
+
+
+
+
 
