@@ -3,9 +3,9 @@ import os
 from ConfigParser import SafeConfigParser
 
 
-class trace_recorder(object):
+class TraceRecorder(object):
     def __init__(self):
-        super(trace_recorder, self).__init__()
+        super(TraceRecorder, self).__init__()
         self.directory = "D:/Temp/traces"
         self.trace_count_filename = "trace_count.txt"
         self.trace_count = "1"
@@ -45,7 +45,7 @@ class trace_recorder(object):
             self.trace_count = file.read()
             file.close()
 
-trace_recorder = trace_recorder()
+trace_recorder = TraceRecorder()
 trace_recorder.setup()
 for x in range(0, 100):
     trace_recorder.write_csv_file([1, 2, 3, 4, 5])
