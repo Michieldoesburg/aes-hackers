@@ -19,13 +19,13 @@ class usbtmc:
             quit()
 
     def write(self, command):
-        os.write(self.FILE, command)
+        os.write(self.FILE, bytes(command, 'ascii'))
 
     def read(self, length=4000):
-        return os.read(self.FILE, length)
+        return os.read(self.FILE, length).decode('ascii')
 
     def get_name(self):
-        self.write(b"*IDN?")
+        self.write("*IDN?\n")
         return self.read(900)
 
     def send_reset(self):
@@ -64,10 +64,13 @@ def main():
             break
 
         if command.find('?') >= 0:
-            answer = scope.read(bytes(command, 'ascii'))
-            print(answer)
+            try:
+                answer = scope.read(command)
+                print(answer)
+            except TimeoutError:
+                print("Connection timed out, did you type the right command?")
         else:
-            scope.write(bytes(command, 'ascii'))
+            scope.write(command)
 
 
 if __name__ == '__main__':
