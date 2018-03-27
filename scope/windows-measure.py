@@ -9,8 +9,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time
 
-import ScopeWrapper
-import TraceRecorder
+from ScopeWrapper import ScopeWrapper
+from TraceRecorder import TraceRecorder
 
 scope_wrapper = ScopeWrapper()
 trace_recorder = TraceRecorder()
@@ -26,6 +26,8 @@ scope_wrapper.write("WAV:STOP 1200")
 
 scope_wrapper.write("WAV:DATA?")
 result = scope_wrapper.read()
+
+scope_wrapper.write(":RUN")
 
 #print ':'.join(hex(ord(x))[2:] for x in result)
 

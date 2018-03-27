@@ -7,18 +7,16 @@ class TraceRecorder(object):
 
     def __init__(self):
         super(TraceRecorder, self).__init__()
-        self.directory = "D:/Temp/traces"
+        # Read the settings file
+        config = SafeConfigParser()
+        config.read('config.ini')
+        self.directory = config.get('main', 'directory')
         self.trace_count_filename = "trace_count.txt"
         self.trace_count = "1"
         self.trace_count_file_path = self.directory + "/" + self.trace_count_filename
         self.setup()
 
     def setup(self):
-        # Read the settings file
-        config = SafeConfigParser()
-        config.read('config.ini')
-        self.directory = config.get('main', 'directory')
-
         # Create directory for the traces
         self.create_directory()
 
