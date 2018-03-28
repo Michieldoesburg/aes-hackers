@@ -101,7 +101,7 @@ int main(void)
 		Chip_GPIO_SetPinOutLow(LPC_GPIO, DEBUG_PORT, DEBUG_PIN);
 
 		// Send output data via UART.
-		LOG_DATA(buffer, 16);
+		LOG_DATA(buffer, AES_BLOCKLEN);
 	}
 
 	return 1;
