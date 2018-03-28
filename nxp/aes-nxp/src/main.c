@@ -50,13 +50,8 @@ uint8_t key[] = {
 };
 #endif
 
-// Input string = "ABCDEFGH12345678".
-// AES's ECB method can only be fed a 16 byte buffer.
-const uint8_t input_buffer[AES_BLOCKLEN] = "ABCDEFGH12345678";
-
 // Get input from UART.
 uint8_t buffer[AES_BLOCKLEN];
-uint8_t uart_rx_done;
 
 int main(void)
 {
@@ -93,19 +88,8 @@ int main(void)
 	while (1) {
 
 		// Receive text to be encrypted via UART (interrupt).
-		// uart_rx_done = 0;
-		// NVIC_EnableIRQ(UART0_IRQn);
-		// while (!uart_rx_done);
-		// NVIC_DisableIRQ(UART0_IRQn);
-
-		uint8_t i;
-		for (i = 0; i < AES_BLOCKLEN; i++) {
-			buffer[i] = input_buffer[i];
-		}
-
-		// Log input data.
-		// LOG_DATA(buffer, 16);
-		// LOG("\n");
+		start_uart_rx(AES_BLOCKLEN);
+		while (is_uart_rx_busy());
 
 		// Pull-up GPIO.
 		Chip_GPIO_SetPinOutHigh(LPC_GPIO, DEBUG_PORT, DEBUG_PIN);
@@ -115,6 +99,9 @@ int main(void)
 
 		// Pull-down GPIO.
 		Chip_GPIO_SetPinOutLow(LPC_GPIO, DEBUG_PORT, DEBUG_PIN);
+
+		// Send output data via UART.
+		LOG_DATA(buffer, 16);
 	}
 
 	return 1;

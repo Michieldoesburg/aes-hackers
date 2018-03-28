@@ -23,7 +23,7 @@ DEFINES += \
 	-DECB=1 \
 	-DAES128=1 \
 	-DENABLE_UART_LOG=1 \
-	-DENABLE_UART_RX=0 \
+	-DENABLE_UART_RX=1 \
 
 INCLUDES += \
 	-I ./include \
