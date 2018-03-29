@@ -43,6 +43,5 @@ with serial.Serial(port=port, baudrate=baudrate) as ser:
 		decrypted_str = cipher.decrypt(encrypted_str)
 
 		# Print output
-		print("Encrypted string: {:s}".format(encrypted_str))
 		print("Decrypted string: {:s}".format(decrypted_str))
 

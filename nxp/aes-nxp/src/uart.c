@@ -1,20 +1,18 @@
 #include <uart.h>
 
-#include <stdint.h>
-
 #include <chip.h>
 #if USE_BOARD
 #include <board.h>
 #endif
 
 
-extern uint8_t input_text[];
-extern uint8_t idx;
+uint16_t rx_index;
+uint16_t n_bytes;
+uint8_t uart_rx_busy;
+
+extern uint8_t buffer[];
 
 
-/**
- * Initialize UART.
- */
 void uart_init()
 {
     // Select IOCON_FUNC1 function (UART) for pins PIO1_6 and PIO1_7.
@@ -44,9 +42,24 @@ void uart_init()
     // Set UART general interrupt's priority (1).
     NVIC_SetPriority(UART0_IRQn, 1);
 
-    // UART RX interrupt is enabled in main routine.
+    // Enable UART general interrupt.
     // NVIC_EnableIRQ(UART0_IRQn);
 #endif
+}
+
+
+void start_uart_rx(uint16_t bytes_to_receive)
+{
+    rx_index = 0;
+    n_bytes = bytes_to_receive;
+    uart_rx_busy = 1;
+    NVIC_EnableIRQ(UART0_IRQn);
+}
+
+
+uint8_t is_uart_rx_busy()
+{
+    return uart_rx_busy;
 }
 
 
@@ -55,9 +68,12 @@ void uart_init()
  */
 void UART_IRQHandler(void)
 {
-	uint8_t received = Chip_UART_ReadByte(LPC_USART);
-
     // Fill in text array.
-    input_text[idx] = received;
-    idx++;
+    buffer[rx_index] = Chip_UART_ReadByte(LPC_USART);
+    rx_index++;
+
+    if (rx_index == n_bytes) {
+        uart_rx_busy = 0;
+        NVIC_DisableIRQ(UART0_IRQn);
+    }
 }

@@ -22,8 +22,8 @@ DEFINES += \
 	-DUSE_BOARD=0 \
 	-DECB=1 \
 	-DAES128=1 \
-	-DENABLE_UART_LOG=0 \
-	-DENABLE_UART_RX=0 \
+	-DENABLE_UART_LOG=1 \
+	-DENABLE_UART_RX=1 \
 
 INCLUDES += \
 	-I ./include \
@@ -105,7 +105,7 @@ rebuild: clean all
 run: all
 	$(VECHO) ""
 	$(VECHO) "Booting LPC-Link2..."
-	$(V) $(LPC_LINK_BOOT)
+	-$(V) $(LPC_LINK_BOOT)
 	$(VECHO) ""
 	$(VECHO) "Uploading firmware..."
 	$(V) $(LPC_LINK_FLASH) -flash-load-exec "$(ELF)" -p$(FLASH_DEVICE)
@@ -113,7 +113,7 @@ run: all
 debug: all
 	$(VECHO) ""
 	$(VECHO) "Booting LPC-Link2..."
-	$(V) $(LPC_LINK_BOOT)
+	-$(V) $(LPC_LINK_BOOT)
 	$(VECHO) ""
 	$(VECHO) "Starting GDB..."
 	$(GDB) -ex "target extended-remote | $(LPC_LINK_FLASH) -2 -p$(FLASH_DEVICE)" $(ELF)

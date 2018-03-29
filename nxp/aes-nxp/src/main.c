@@ -12,8 +12,6 @@
  * and printf statements are rerouted to use this peripheral.
  * - BaudRate: 115200
  * - Data type: 8 bits, 1 stop bit, no parity
- * 
- * TODO: implement UART reception if needed
  */
 
 #include <stdio.h>
@@ -52,17 +50,8 @@ uint8_t key[] = {
 };
 #endif
 
-// Input string = "ABCDEFGH12345678".
-// AES's ECB method can only be fed a 16 byte buffer.
-uint8_t input_text[AES_BLOCKLEN] = {
-	'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
-	'1', '2', '3', '4', '5', '6', '7', '8'
-};
-
 // Get input from UART.
-uint8_t idx;
-// uint8_t input_text[AES_BLOCKLEN];
-
+uint8_t buffer[AES_BLOCKLEN];
 
 int main(void)
 {
@@ -97,37 +86,22 @@ int main(void)
 	//        <--> <-------> <-->       <--> <-------> <-->      
 	//         RX   Encrypt   TX         RX   Encrypt   TX       
 	while (1) {
+
 		// Receive text to be encrypted via UART (interrupt).
-		idx = 0;
-
-		// NVIC_EnableIRQ(UART0_IRQn);
-		// while (idx < AES_BLOCKLEN);
-		// NVIC_DisableIRQ(UART0_IRQn);
-
-		// Not logging since UART is used to send encrypted data to terminal!
-		// LOG("Received text: ");
-		// LOG_DATA(input_text, 16);
-		// LOG("\n");
+		start_uart_rx(AES_BLOCKLEN);
+		while (is_uart_rx_busy());
 
 		// Pull-up GPIO.
 		Chip_GPIO_SetPinOutHigh(LPC_GPIO, DEBUG_PORT, DEBUG_PIN);
 
 		// Encrypt data.
-		AES_ECB_encrypt(&ctx, input_text);
-
-		// Not logging since UART is used to send encrypted data to terminal!
-		// LOG("Encrypted text: ");
-		// LOG_DATA(input_text, 16);
-		// LOG("\n");
+		AES_ECB_encrypt(&ctx, buffer);
 
 		// Pull-down GPIO.
 		Chip_GPIO_SetPinOutLow(LPC_GPIO, DEBUG_PORT, DEBUG_PIN);
 
-		// Decrypt data.
-		AES_ECB_decrypt(&ctx, input_text);
-
-		// Send back encrypted data via UART.
-		// Chip_UART_SendBlocking(LPC_USART, input_text, AES_BLOCKLEN);
+		// Send output data via UART.
+		LOG_DATA(buffer, AES_BLOCKLEN);
 	}
 
 	return 1;
