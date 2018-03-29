@@ -1,5 +1,12 @@
 import numpy as np
+from scope.ScopeWrapper import ScopeWrapper
+from scope.TraceRecorder import TraceRecorder
+import serial
 
+# Specify USB serial device name and BaudRate
+port = 'COM11'
+baudrate = 115200
+#traceRecorder = TraceRecorder()
 
 # Declare consts
 N_bytes_string = 16
@@ -9,7 +16,7 @@ Trace_length = 1200
 Key_range = 256
 
 s_box = np.asarray([
-0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76,
+    0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76,
     0xca, 0x82, 0xc9, 0x7d, 0xfa, 0x59, 0x47, 0xf0, 0xad, 0xd4, 0xa2, 0xaf, 0x9c, 0xa4, 0x72, 0xc0,
     0xb7, 0xfd, 0x93, 0x26, 0x36, 0x3f, 0xf7, 0xcc, 0x34, 0xa5, 0xe5, 0xf1, 0x71, 0xd8, 0x31, 0x15,
     0x04, 0xc7, 0x23, 0xc3, 0x18, 0x96, 0x05, 0x9a, 0x07, 0x12, 0x80, 0xe2, 0xeb, 0x27, 0xb2, 0x75,
@@ -27,6 +34,8 @@ s_box = np.asarray([
     0x8c, 0xa1, 0x89, 0x0d, 0xbf, 0xe6, 0x42, 0x68, 0x41, 0x99, 0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16
 ])
 
+# Dictionary to store Strings with corresponding traces.
+strings_to_traces = {}
 
 def hamming_weight(n):
     n = int(n)
@@ -35,7 +44,6 @@ def hamming_weight(n):
         c += 1
         n &= n - 1
     return c
-
 
 # Generate random plaintexts
 plain_texts = []
@@ -47,11 +55,41 @@ for i in range(M_traces):
 
 # Record power consumption
 traces = np.ndarray(shape=(M_traces, Trace_length))
+
 for i in range(M_traces):
-    # Send in plaintext over serial
-    # Record trace from scope
-    # Place in trace matrix
-    break
+    """
+    Send in plaintext over serial
+    Record trace from scope
+    Place in trace matrix
+    """
+
+    # Open serial connection
+    with serial.Serial(port=port, baudrate=baudrate) as ser:
+
+        # Get text to be encrypted
+        input_str = plain_texts[i]
+
+        # Send text to be encrypted to MCU
+        ser.write(input_str.encode())
+
+        # Receive encrypted text
+        begin_signal = ser.read(1)
+
+        assert(begin_signal == "B")
+
+        scopeWrapper.start_recording()
+
+        end_signal = ser.read(1)
+
+        assert(end_signal == "E")
+
+        scopeWrapper.stop_recording()
+
+        result = scopeWrapper.get_trace()
+
+        strings_to_traces[plain_texts[i]] = result
+
+        print(plain_texts[i], result)
 
 # Calculate hypothetical values
 hyp_values = np.ndarray(shape=(M_traces, Key_range))
@@ -71,5 +109,6 @@ correlation = np.ndarray(shape=(Key_range, Trace_length))
 for i in range(Key_range):
     for j in (Trace_length):
         correlation[i, j] = np.corrcoeff(hyp_power[:, i], traces[:, j])
+
 
 # Find peaks in correlation

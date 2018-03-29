@@ -24,3 +24,22 @@ class ScopeWrapper(object):
 
     def read(self):
         return self.scope.read(encoding="Latin-1")
+
+    def start_recording(self):
+        self.write(":RUN")
+
+    def stop_recording(self):
+        self.write(":STOP")
+
+    def get_trace(self):
+        self.write(":WAV:SOUR CHAN1")
+        self.write("WAV:MODE NORM")
+        self.write("WAV:FORM BYTE")
+
+        # Choose start- and stopping point
+        self.write("WAV:STAR 1")
+        self.write("WAV:STOP 1200")
+
+        self.write("WAV:DATA?")
+        result = self.read()
+        return result
