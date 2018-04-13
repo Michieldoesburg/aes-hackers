@@ -1,18 +1,22 @@
 import numpy as np
+import matplotlib.pyplot as plt
 from scope.ScopeWrapper import ScopeWrapper
 from scope.TraceRecorder import TraceRecorder
+from time import sleep
 import serial
+import pickle
+
+scopeWrapper = ScopeWrapper()
 
 # Specify USB serial device name and BaudRate
 port = 'COM11'
 baudrate = 115200
-#traceRecorder = TraceRecorder()
 
 # Declare consts
 N_bytes_string = 16
 N_bytes_key = 128
 M_traces = 1000
-Trace_length = 1200
+Trace_length = 2400
 Key_range = 256
 
 s_box = np.asarray([
@@ -54,7 +58,7 @@ for i in range(M_traces):
     plain_texts.append(np.random.bytes(N_bytes_string))
 
 # Record power consumption
-traces = np.ndarray(shape=(M_traces, Trace_length))
+traces = {}
 
 for i in range(M_traces):
     """
@@ -65,31 +69,39 @@ for i in range(M_traces):
 
     # Open serial connection
     with serial.Serial(port=port, baudrate=baudrate) as ser:
+        # sleep(.01)
 
         # Get text to be encrypted
         input_str = plain_texts[i]
 
+        scopeWrapper.start_recording()
+        sleep(.5)
         # Send text to be encrypted to MCU
-        ser.write(input_str.encode())
+        ser.write(input_str)
 
         # Receive encrypted text
         begin_signal = ser.read(1)
 
         assert(begin_signal == "B")
 
-        scopeWrapper.start_recording()
-
         end_signal = ser.read(1)
 
         assert(end_signal == "E")
-
-        scopeWrapper.stop_recording()
-
+        #scopeWrapper.stop_recording()
+        sleep(.5)
         result = scopeWrapper.get_trace()
 
         strings_to_traces[plain_texts[i]] = result
 
         print(plain_texts[i], result)
+
+        data = np.frombuffer(result[12:], "B")
+        traces[input_str] = data
+
+        #scopeWrapper.start_recording()
+
+with open('traces.pickle', 'wb') as handle:
+    pickle.dump(traces, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 # Calculate hypothetical values
 hyp_values = np.ndarray(shape=(M_traces, Key_range))

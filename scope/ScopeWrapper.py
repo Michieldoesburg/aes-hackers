@@ -13,10 +13,10 @@ class ScopeWrapper(object):
         # Get the USB device, e.g. 'USB0::0x1AB1::0x0588::DS1ED141904883'
         instruments = visa.get_instruments_list()
         usb = filter(lambda x: 'USB' in x, instruments)
-        if len(usb) != 1:
-            print 'Bad instrument list', instruments
-            sys.exit(-1)
-        self.scope = visa.instrument(usb[0], timeout=20, chunk_size=1024000) # bigger timeout for long mem
+        #if len(usb) != 1:
+        #    print 'Bad instrument list', instruments
+        #    sys.exit(-1)
+        self.scope = visa.instrument(u'USB0::0x1AB1::0x04CE::DS1ZA192409506::INSTR', timeout=20, chunk_size=1024000) # bigger timeout for long mem
 
     def write(self, str):
         self.scope.write(str)
@@ -26,7 +26,7 @@ class ScopeWrapper(object):
         return self.scope.read(encoding="Latin-1")
 
     def start_recording(self):
-        self.write(":RUN")
+        self.write(":SINGLE")
 
     def stop_recording(self):
         self.write(":STOP")
