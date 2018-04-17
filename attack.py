@@ -15,7 +15,7 @@ baudrate = 115200
 # Declare consts
 N_bytes_string = 16
 N_bytes_key = 128
-M_traces = 1
+M_traces = 100
 Trace_length = 2400
 Key_range = 256
 
@@ -52,18 +52,10 @@ def hamming_weight(n):
 # Generate random plaintexts
 plain_texts = []
 
-print(plain_texts)
-
 for i in range(M_traces):
     plain_texts.append(np.random.bytes(N_bytes_string))
 
-# Record power consumption
 traces = {}
-
-#scopeWrapper.write(":ACQ:MDEP AUTO")
-#scopeWrapper.write(":ACQ:MDEP?")
-#print("Memory depth: " + str(scopeWrapper.read()))
-
 for i in range(M_traces):
     """
     Send in plaintext over serial
@@ -80,7 +72,8 @@ for i in range(M_traces):
 
         scopeWrapper.start_recording()
 
-        sleep(.5)
+        sleep(.01)
+
         # Send text to be encrypted to MCU
         ser.write(input_str)
 
@@ -93,17 +86,11 @@ for i in range(M_traces):
 
         assert(end_signal == "E")
 
-        sleep(.5)
-        result = scopeWrapper.get_trace
+        sleep(.01)
+        result = scopeWrapper.get_trace()
+        traces[plain_texts[i]] = result
 
-    #        strings_to_traces[plain_texts[i]] = result
-
-#        print(plain_texts[i], result)
-
-#        data = np.frombuffer(result[12:], "B")
-#        traces[input_str] = data
-
-        #scopeWrapper.start_recording()
+        scopeWrapper.start_recording()
 
 with open('traces.pickle', 'wb') as handle:
     pickle.dump(traces, handle, protocol=pickle.HIGHEST_PROTOCOL)

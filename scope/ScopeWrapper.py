@@ -33,21 +33,35 @@ class ScopeWrapper(object):
     def stop_recording(self):
         self.write(":STOP")
 
-    @property
     def get_trace(self):
+        final_trace = numpy.ndarray((0,))
+
         self.write(":WAV:SOUR CHAN1")
 
         self.write(":WAV:POIN:MODE RAW")
 
         self.write("WAV:FORM BYTE")
 
-        data = []
+        """self.write("WAV:STAR 5500000")
+        self.write("WAV:STOP 5750000")
 
-        for i in range(1, 12000000, 250000):
+        self.write(":WAV:DATA?")
+
+        rawdata = self.read()
+
+        rawdata = ''.join(rawdata)
+        data = numpy.frombuffer(rawdata, 'B')
+        temp = numpy.ndarray(shape=(data.shape[0] / 2))
+        for i in range(0, data.shape[0], 2):
+            temp[i / 2] = (data[i + 1] << 8) | data[i]
+
+        data = temp[11:-1]"""
+
+        for i in range(5700001, 6200000, 250000):
             print("START " + str(i))
             print("STOP " + str(i + 250000 - 1))
             self.write("WAV:STAR " + str(i))
-            self.write("WAV:STOP " + str(i) + 250000 - 1)
+            self.write("WAV:STOP " + str(i + 250000 - 1))
 
             self.write(":WAV:DATA?")
 
@@ -56,15 +70,32 @@ class ScopeWrapper(object):
             rawdata = ''.join(rawdata)
             data = numpy.frombuffer(rawdata, 'B')
             temp = numpy.ndarray(shape=(data.shape[0] / 2))
-            for i in range(0, data.shape[0], 2):
-                temp[i / 2] = (data[i + 1] << 8) | data[i]
+            for j in range(0, data.shape[0], 2):
+                temp[j / 2] = (data[j + 1] << 8) | data[j]
 
-            temp = temp[11:-1]
+            data = temp[11:-1]
 
-        # data = temp[::-1]# * -1 + 255 # Get rid of preamble and stop byte
-        plt.plot(data)
-        plt.show()
+            final_trace = numpy.concatenate((final_trace, data), 0)
 
-        #self.write("WAV:DATA?")
-        #result = self.read()
-        return data
+            time.sleep(.1)
+
+        print("START " + str(6200001))
+        print("STOP " + str(6350000))
+        self.write("WAV:STAR 6200001")
+        self.write("WAV:STOP 6300000")
+
+        self.write(":WAV:DATA?")
+
+        rawdata = self.read()
+
+        rawdata = ''.join(rawdata)
+        data = numpy.frombuffer(rawdata, 'B')
+        temp = numpy.ndarray(shape=(data.shape[0] / 2))
+        for j in range(0, data.shape[0], 2):
+            temp[j / 2] = (data[j + 1] << 8) | data[j]
+
+        data = temp[11:-1]
+
+        final_trace = numpy.concatenate((final_trace, data), 0)
+
+        return final_trace
