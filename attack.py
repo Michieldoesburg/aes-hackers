@@ -15,7 +15,7 @@ baudrate = 115200
 # Declare consts
 N_bytes_string = 16
 N_bytes_key = 128
-M_traces = 1000
+M_traces = 1
 Trace_length = 2400
 Key_range = 256
 
@@ -60,6 +60,10 @@ for i in range(M_traces):
 # Record power consumption
 traces = {}
 
+#scopeWrapper.write(":ACQ:MDEP AUTO")
+#scopeWrapper.write(":ACQ:MDEP?")
+#print("Memory depth: " + str(scopeWrapper.read()))
+
 for i in range(M_traces):
     """
     Send in plaintext over serial
@@ -75,6 +79,7 @@ for i in range(M_traces):
         input_str = plain_texts[i]
 
         scopeWrapper.start_recording()
+
         sleep(.5)
         # Send text to be encrypted to MCU
         ser.write(input_str)
@@ -87,16 +92,16 @@ for i in range(M_traces):
         end_signal = ser.read(1)
 
         assert(end_signal == "E")
-        #scopeWrapper.stop_recording()
+
         sleep(.5)
-        result = scopeWrapper.get_trace()
+        result = scopeWrapper.get_trace
 
-        strings_to_traces[plain_texts[i]] = result
+    #        strings_to_traces[plain_texts[i]] = result
 
-        print(plain_texts[i], result)
+#        print(plain_texts[i], result)
 
-        data = np.frombuffer(result[12:], "B")
-        traces[input_str] = data
+#        data = np.frombuffer(result[12:], "B")
+#        traces[input_str] = data
 
         #scopeWrapper.start_recording()
 
@@ -118,9 +123,9 @@ for i in range(M_traces):
 # Calculate correlation between hypothetical
 # and actual power consumption
 correlation = np.ndarray(shape=(Key_range, Trace_length))
-for i in range(Key_range):
-    for j in (Trace_length):
-        correlation[i, j] = np.corrcoeff(hyp_power[:, i], traces[:, j])
+#for i in range(Key_range):
+#    for j in (Trace_length):
+#        correlation[i, j] = np.corrcoeff(hyp_power[:, i], traces[:, j])
 
 
 # Find peaks in correlation
