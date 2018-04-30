@@ -94,25 +94,3 @@ for i in range(M_traces):
 
 with open('traces.pickle', 'wb') as handle:
     pickle.dump(traces, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
-# Calculate hypothetical values
-hyp_values = np.ndarray(shape=(M_traces, Key_range))
-for i in range(M_traces):
-    for j in range(Key_range):  # Try all one byte keys
-        hyp_values[i, j] = s_box[int(plain_texts[i][0].encode("hex"), 16) ^ j]
-
-# Calculate hypothetical power with hamming weight
-hyp_power = np.ndarray(shape=(M_traces, Key_range))
-for i in range(M_traces):
-    for j in range(Key_range):
-        hyp_power[i, j] = hamming_weight(hyp_values[i, j])
-
-# Calculate correlation between hypothetical
-# and actual power consumption
-correlation = np.ndarray(shape=(Key_range, Trace_length))
-#for i in range(Key_range):
-#    for j in (Trace_length):
-#        correlation[i, j] = np.corrcoeff(hyp_power[:, i], traces[:, j])
-
-
-# Find peaks in correlation
