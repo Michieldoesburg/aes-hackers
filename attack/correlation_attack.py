@@ -12,12 +12,13 @@ KEY_RANGE = 256           # 8-bit key, 0-255 possible values
 DOWNSAMPLE = 20           # Downsampling factor, lowering res, speeding up
 
 # List of file names where traces can be found
-DATA_PATH = '/Volumes/DATA/AES_power_traces/Batch1/'
-NUM_FILES = 15
+#  DATA_PATH = '/Volumes/DATA/AES_power_traces/Batch1/'
+DATA_PATH = '/Users/Carlo/Developer/NXP/Repositories/aes-hackers/attack/'
+NUM_FILES = 1
 TRACE_FILES = []
 
 for i in range(NUM_FILES):
-    TRACE_FILES.append('traces{}.pickle'.format(i+4))
+    TRACE_FILES.append('traces{}.pickle'.format(i))
 
 s_box = np.asarray([
     0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76,

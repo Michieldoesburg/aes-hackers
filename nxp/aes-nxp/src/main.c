@@ -81,10 +81,10 @@ int main(void)
 
 	// Perform AES.
 	// The GPIO behaves as follows:
-	//             _________                 _________           
+	//             _________                 _________
 	//  _ _ _ ____|         |____ _ _ _ ____|         |____ _ _ _
-	//        <--> <-------> <-->       <--> <-------> <-->      
-	//         RX   Encrypt   TX         RX   Encrypt   TX       
+	//        <--> <-------> <-->       <--> <-------> <-->
+	//         RX   Encrypt   TX         RX   Encrypt   TX
 	while (1) {
 
 		// Receive text to be encrypted via UART (interrupt).
