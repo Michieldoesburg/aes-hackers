@@ -9,7 +9,7 @@ N_BYTES_STRING = 16       # No of bytes in plaintext string
 N_BYTES_KEY = 128         # No of bytes in key
 TRACE_LENGTH = 600000     # No of samples in a trace
 KEY_RANGE = 256           # 8-bit key, 0-255 possible values
-DOWNSAMPLE = 1           # Downsampling factor, lowering res, speeding up
+DOWNSAMPLE = 20           # Downsampling factor, lowering res, speeding up
 
 # List of file names where traces can be found
 DATA_PATH = '/Users/torjushaukom/Desktop/non_highres/'
@@ -110,11 +110,6 @@ def matcor(x, y):
 
 
 def main():
-    correlations = np.ndarray(shape=(
-        len(TRACE_FILES),
-        TRACE_LENGTH / DOWNSAMPLE,
-        KEY_RANGE))
-
     status_bar = print_status_bar(NUM_FILES)
     next(status_bar)
     for i, trace_file in enumerate(TRACE_FILES):
@@ -127,10 +122,10 @@ def main():
             traces = np.concatenate((traces, more_traces), axis=0)
             M_traces += more_M
 
-        print("Plot all traces")
-        plt.plot(traces.T)
-        plt.show()
-        quit()
+        # print("Plot all traces")
+        # plt.plot(traces.T)
+        # plt.show()
+        # quit()
 
     hyp_power = hypothetical_power_from_plain_texts(
         plain_texts,
@@ -143,7 +138,7 @@ def main():
     # by doing an argmax of the flattened array and recasiting it to 2D
     print("Finding max correlation")  # ABS?
     max_index = np.unravel_index(
-        np.nanargmax(correlation),
+        np.nanargmax(np.abs(correlation)),
         correlation.shape)
 
     print("Max correlation at key guess: {}, time: {}, correlation: {}".format(
