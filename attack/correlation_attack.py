@@ -9,15 +9,16 @@ N_BYTES_STRING = 16       # No of bytes in plaintext string
 N_BYTES_KEY = 128         # No of bytes in key
 TRACE_LENGTH = 600000     # No of samples in a trace
 KEY_RANGE = 256           # 8-bit key, 0-255 possible values
-DOWNSAMPLE = 20           # Downsampling factor, lowering res, speeding up
+DOWNSAMPLE = 1           # Downsampling factor, lowering res, speeding up
 
 # List of file names where traces can be found
-DATA_PATH = '/Volumes/DATA/AES_power_traces/Batch1/'
-NUM_FILES = 15
+DATA_PATH = '/Users/torjushaukom/Desktop/non_highres/'
+# DATA_PATH = '/Volumes/DATA/AES_power_traces/batch3_1/'
+NUM_FILES = 100
 TRACE_FILES = []
 
 for i in range(NUM_FILES):
-    TRACE_FILES.append('traces{}.pickle'.format(i+4))
+    TRACE_FILES.append('traces{}.pickle'.format(i))
 
 s_box = np.asarray([
     0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76,
@@ -39,6 +40,25 @@ s_box = np.asarray([
 ])
 
 
+def print_status_bar(length):
+    """Print a status bar, since grid search can take a while"""
+    print("Calculating correlation between actual power traces and hypthetical power model")
+    toolbar_width = 20
+    sys.stdout.write("[%s]" % (" " * toolbar_width))
+    sys.stdout.flush()
+    sys.stdout.write("\b" * (toolbar_width+1))
+    yield
+
+    for i in range(1, length+1):
+        if (i % (length // toolbar_width)) == 0:
+            sys.stdout.write("=")
+            sys.stdout.flush()
+        yield
+
+    sys.stdout.write('\n')
+    return
+
+
 def hamming_weight(n):
     n = int(n)
     c = 0
@@ -49,18 +69,22 @@ def hamming_weight(n):
 
 
 def load_traces(filename):
-    print("Opening power traces")
+    # print("Opening power traces")
     with open(DATA_PATH + filename, 'rb') as f:
-        traces = pickle.load(f)
+        data = pickle.load(f)
 
     # Clean broken traces
-    for plain_text in traces.keys():
-        if len(traces[plain_text]) != TRACE_LENGTH:
-            del traces[plain_text]
+    for plain_text in data.keys():
+        if len(data[plain_text]) != TRACE_LENGTH:
+            del data[plain_text]
 
-    plain_texts = traces.keys()
-    traces = np.stack(traces.values(), axis=0)
+    plain_texts = []
+    traces = []
+    for pt in data:
+        plain_texts.append(pt)
+        traces.append(data[pt])
 
+    traces = np.array(traces)
     # Downsample array
     traces = traces[:, ::DOWNSAMPLE]
 
@@ -71,77 +95,74 @@ def load_traces(filename):
 
 def hypothetical_power_from_plain_texts(plain_texts, M_traces, KEY_RANGE):
     # Calculate hypothetical power with hamming weight
-    print("Calculating hypothetical power model")
+    # print("Calculating hypothetical power model")
     hyp_power = np.ndarray(shape=(M_traces, KEY_RANGE))
     for i in range(M_traces):
         for j in range(KEY_RANGE):
-            hyp_value = s_box[int(plain_texts[i][0].encode("hex"), 16) ^ j]
+            hyp_value = s_box[ord(plain_texts[i][1]) ^ j]
             hyp_power[i, j] = hamming_weight(hyp_value)
     return hyp_power
 
 
-def calculate_correlations(hyp_power, traces):
-    # Calculate correlation between hypothetical
-    # and actual power consumption
-    print("Calculating correlation between actual power traces and hypthetical power model")
-
-    correlation = np.ndarray(shape=(KEY_RANGE, TRACE_LENGTH / DOWNSAMPLE))
-    sys.stdout.write("Current key: ")
-    for i in range(KEY_RANGE):
-        sys.stdout.write("{}".format(i))
-        sys.stdout.flush()
-        for j in range(TRACE_LENGTH / DOWNSAMPLE):
-            corr = np.corrcoef(hyp_power[:, i], traces[:, j])[1, 0]
-            correlation[i, j] = corr
-        sys.stdout.write("\b" * len(str(i)))
-    sys.stdout.write("\n")
-    sys.stdout.flush()
-    return correlation
+def matcor(x, y):
+    xc = x.shape[1]
+    return np.corrcoef(x, y, rowvar=False)[xc:, :xc]
 
 
 def main():
     correlations = np.ndarray(shape=(
         len(TRACE_FILES),
-        KEY_RANGE,
-        TRACE_LENGTH / DOWNSAMPLE))
+        TRACE_LENGTH / DOWNSAMPLE,
+        KEY_RANGE))
 
+    status_bar = print_status_bar(NUM_FILES)
+    next(status_bar)
     for i, trace_file in enumerate(TRACE_FILES):
-        plain_texts, traces, M_traces = load_traces(trace_file)
+        next(status_bar)
+        if i == 0:
+            plain_texts, traces, M_traces = load_traces(trace_file)
+        else:
+            more_pts, more_traces, more_M = load_traces(trace_file)
+            plain_texts.extend(more_pts)
+            traces = np.concatenate((traces, more_traces), axis=0)
+            M_traces += more_M
 
-        # print("Plot all traces")
-        # plt.plot(traces.T)
-        # plt.show()
+        print("Plot all traces")
+        plt.plot(traces.T)
+        plt.show()
+        quit()
 
-        hyp_power = hypothetical_power_from_plain_texts(
-            plain_texts,
-            M_traces,
-            KEY_RANGE)
+    hyp_power = hypothetical_power_from_plain_texts(
+        plain_texts,
+        M_traces,
+        KEY_RANGE)
 
-        correlations[i, :, :] = calculate_correlations(hyp_power, traces)
-
-    correlation = np.mean(correlations, axis=0)
+    correlation = matcor(hyp_power, traces)
 
     # Find the indices of the max value in correlation
     # by doing an argmax of the flattened array and recasiting it to 2D
     print("Finding max correlation")  # ABS?
-    max_index = np.unravel_index(np.abs(correlation).argmax(), correlation.shape)
+    max_index = np.unravel_index(
+        np.nanargmax(correlation),
+        correlation.shape)
 
-    print("Max correlation at key guess: {}, time: {}".format(
-        max_index[0], max_index[1]))
+    print("Max correlation at key guess: {}, time: {}, correlation: {}".format(
+        max_index[1], max_index[0], correlation[max_index[0], max_index[1]]))
+
 
     print("Plotting correlations")
     for j in range(KEY_RANGE):
-        if j == max_index[0]:
+        if j == max_index[1]:
             continue
         else:
-            plt.plot(correlation[j, :], alpha=.1)
+            plt.plot(correlation[:, j], alpha=.1)
 
-    plt.plot(correlation[max_index[0], :])
+    plt.plot(correlation[:, max_index[1]])
     plt.xlabel('Sample')
     plt.ylabel('Correlation')
-    plt.title('Correlation coefficient between trace and hypothetical value, max at key {}'.format(max_index[0]))
+    plt.title('Correlation coefficient between trace and hypothetical value, max at key {}'.format(max_index[1]))
 
-    plt.savefig('correlation.eps')
+    plt.savefig('correlation.eps', dpi=300)
     plt.show()
 
 
