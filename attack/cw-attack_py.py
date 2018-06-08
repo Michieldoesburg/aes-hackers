@@ -1,18 +1,20 @@
 from __future__ import print_function
 import numpy as np
+import matplotlib.pyplot as plt
 import pickle
 import sys
 
+plt.rc('text', usetex=True)
 # List of file names where traces can be found
-DATA_PATH = '/Users/torjushaukom/Desktop/non_highres/'
+DATA_PATH = '/Volumes/DATA/AES_power_traces/non_highres/'
 NUM_FILES = 100
 
 # Declare consts
 N_BYTES_STRING = 16       # No of bytes in plaintext string
 TRACE_LENGTH = 600000     # No of samples in a trace
-DOWNSAMPLE = 5            # Downsampling factor, lowering res, speeding up
+DOWNSAMPLE = 5           # Downsampling factor, lowering res, speeding up
 KEY_RANGE = 256           # 8-bit key, 0-255 possible values
-NUM_OF_SUBKEYS = 4
+NUM_OF_SUBKEYS = 1
 
 # Hamming weight array
 HW = [bin(n).count("1") for n in range(0,256)]
@@ -48,42 +50,44 @@ def load_traces(filename):
 
     # Clean broken traces
     for pt in data.keys():
-        if len(data[pt]) != TRACE_LENGTH:
+        if len(data[pt]) != TRACE_LENGTH or len(pt) != 16:
             del data[pt]
 
     # plaintexts = data.keys()
     # traces = np.stack(data.values(), axis=0)
 
     plaintexts = []
+
     traces = []
     for pt in data:
         plaintexts.append(pt)
         traces.append(data[pt])
 
-    # traces = np.stack(traces, axis=0)
+    traces = np.array(traces)
 
     # Downsample array
-    traces = traces[:][::DOWNSAMPLE]
+    traces = traces[:, ::DOWNSAMPLE]
 
     return plaintexts, traces
 
 
 def main():
 
-    for file_nr in range(0,NUM_FILES):
+    for file_nr in range(0, NUM_FILES):
         p, t = load_traces(DATA_PATH + 'traces' + str(file_nr) + '.pickle')
         if file_nr == 0:
             traces = t
             plaintexts = p
-        else:    
+
+        else:
             traces = np.concatenate((traces, t), axis=0)
-            plaintexts = np.concatenate((plaintexts, p), axis=0)
+            plaintexts.extend(p)
 
     print('To be processed: {}'.format(traces.shape))
 
     numtraces = np.shape(traces)[0] - 1
     numpoint = np.shape(traces)[1]
-    #  print("Number of traces: {}, number of points: {}".format(numtraces, numpoint))
+    print("Number of traces: {}, number of points: {}".format(numtraces, numpoint))
 
     # for i in range(numtraces):
     #     for j in range(16):
@@ -125,11 +129,16 @@ def main():
             maxcpa[kguess] = max(abs(cpaoutput[kguess]))
 
             print(maxcpa[kguess])
+            plt.scatter(kguess, maxcpa[kguess], color='b')
 
         bestguess[bnum] = np.argmax(maxcpa)
 
         cparefs = np.argsort(maxcpa)[::-1]
 
+    plt.title('Correlations for key guesses for the first key byte')
+    plt.xlabel('Key guess')
+    plt.ylabel('Correlation')
+    plt.show()
     outstr = "Best Key Guess: "
     for b in bestguess:
         outstr += "{:02x} ".format(b)
