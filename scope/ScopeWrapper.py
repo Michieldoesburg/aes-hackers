@@ -14,6 +14,7 @@ class ScopeWrapper(object):
     def setup(self):
         # Get the USB device, e.g. 'USB0::0x1AB1::0x0588::DS1ED141904883'
         instruments = visa.get_instruments_list()
+        print(instruments)
         usb = filter(lambda x: 'USB' in x, instruments)
         #if len(usb) != 1:
         #    print 'Bad instrument list', instruments
@@ -38,7 +39,7 @@ class ScopeWrapper(object):
 
         self.write(":WAV:SOUR CHAN1")
 
-        self.write(":WAV:POIN:MODE RAW")
+        self.write(":WAV:MODE RAW")
 
         self.write("WAV:FORM BYTE")
 
